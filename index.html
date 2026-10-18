@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 5 — VTOL Drone Design Portal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{--navy:#1F4E79;--blue:#2E75B6;--lightblue:#BDD7EE;--accent:#C00000;--green:#155724;--bg:#F0F6FF;--card:#fff;--text:#1a1a2e;--muted:#555;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);}
+  header{background:linear-gradient(135deg,#0d3b5e,#1F4E79);color:white;padding:28px 40px;box-shadow:0 4px 20px rgba(31,78,121,0.3);}
+  header .tag{font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.8;margin-bottom:6px;}
+  header h1{font-size:26px;font-weight:700;margin-bottom:4px;}
+  header p{font-size:13px;opacity:.85;}
+  header .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+  header .meta span{background:rgba(255,255,255,.15);padding:4px 12px;border-radius:20px;font-size:12px;}
+  nav{background:var(--navy);display:flex;overflow-x:auto;border-bottom:3px solid var(--accent);}
+  nav button{background:none;border:none;color:rgba(255,255,255,.7);padding:12px 22px;cursor:pointer;font-size:13px;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-3px;transition:all .2s;}
+  nav button.active,nav button:hover{color:white;border-bottom-color:#FFD966;background:rgba(255,255,255,.08);}
+  .container{max-width:1100px;margin:0 auto;padding:28px 20px;}
+  .section{display:none;}.section.active{display:block;}
+  .card{background:var(--card);border-radius:12px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:22px;border-top:4px solid var(--blue);}
+  .card h2{font-size:17px;color:var(--navy);margin-bottom:16px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  @media(max-width:700px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+  .stat-card{background:linear-gradient(135deg,var(--navy),var(--blue));color:white;border-radius:10px;padding:18px;text-align:center;}
+  .stat-card .val{font-size:26px;font-weight:700;}
+  .stat-card .unit{font-size:12px;opacity:.8;}
+  .stat-card .lbl{font-size:11px;opacity:.7;margin-top:4px;text-transform:uppercase;letter-spacing:1px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{background:var(--navy);color:white;padding:10px 14px;text-align:left;}
+  td{padding:9px 14px;border-bottom:1px solid #e8f0f8;}
+  tr:nth-child(even) td{background:#f5f9ff;}
+  .slider-row{margin-bottom:18px;}
+  .slider-row label{display:flex;justify-content:space-between;font-size:13px;color:var(--navy);font-weight:600;margin-bottom:6px;}
+  .slider-row input[type=range]{width:100%;accent-color:var(--blue);}
+  .result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px;}
+  .result-chip{background:linear-gradient(135deg,var(--navy),var(--blue));color:white;border-radius:10px;padding:14px;text-align:center;}
+  .result-chip .rv{font-size:20px;font-weight:700;}
+  .result-chip .rl{font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+  .chart-box{position:relative;height:300px;margin-top:16px;}
+  .vtol-svg{background:#f0f6ff;border-radius:12px;padding:20px;text-align:center;margin-bottom:20px;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+  .badge-green{background:#d4edda;color:#155724;}
+  .badge-blue{background:#cce5ff;color:#004085;}
+  .feature-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #e8f0f8;}
+  .feature-row .icon{font-size:20px;flex-shrink:0;}
+  .feature-row h4{font-size:13px;color:var(--navy);margin-bottom:3px;}
+  .feature-row p{font-size:12px;color:var(--muted);}
+  footer{background:var(--navy);color:rgba(255,255,255,.7);text-align:center;padding:16px;font-size:12px;margin-top:40px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="tag">Def Space Summer Internship 2026 &nbsp;|&nbsp; Aircraft Design Project 5</div>
+  <h1>VTOL Drone Design Portal</h1>
+  <p>Quadrotor VTOL UAV — conceptual design, propulsion sizing, and performance analysis</p>
+  <div class="meta">
+    <span>👤 Nitish Kumar Kannaujiya</span>
+    <span>🎓 24BECCS33 | B.Tech CSE Cybersecurity</span>
+    <span>🏛️ Central University of Jammu</span>
+    <span>📅 2026</span>
+  </div>
+</header>
+<nav>
+  <button class="active" onclick="showTab('overview',this)">🚁 Overview</button>
+  <button onclick="showTab('config',this)">⚙️ Configuration</button>
+  <button onclick="showTab('calc',this)">🧮 Prop Calc</button>
+  <button onclick="showTab('perf',this)">📊 Performance</button>
+  <button onclick="showTab('struct',this)">🔩 Structure</button>
+  <button onclick="showTab('results',this)">📋 Results</button>
+</nav>
+<div class="container">
+
+<!-- OVERVIEW -->
+<div id="overview" class="section active">
+  <div class="grid-3" style="margin-bottom:20px">
+    <div class="stat-card"><div class="val">450mm</div><div class="unit">Motor-to-Motor</div><div class="lbl">Frame Diagonal</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#C00000,#c0392b)"><div class="val">1200g</div><div class="unit">Max AUW</div><div class="lbl">All-Up Weight</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#375623,#27ae60)"><div class="val">~18 min</div><div class="unit">Flight Time</div><div class="lbl">Hover (3S 5200mAh)</div></div>
+  </div>
+  <div class="vtol-svg">
+    <svg viewBox="0 0 500 280" width="100%" style="max-width:500px">
+      <!-- Central body -->
+      <rect x="205" y="115" width="90" height="50" rx="8" fill="#1F4E79"/>
+      <text x="250" y="145" text-anchor="middle" font-size="11" fill="white" font-weight="bold">FC / ESC</text>
+      <!-- Arms (X-config) -->
+      <line x1="250" y1="140" x2="110" y2="60" stroke="#2E75B6" stroke-width="12" stroke-linecap="round"/>
+      <line x1="250" y1="140" x2="390" y2="60" stroke="#2E75B6" stroke-width="12" stroke-linecap="round"/>
+      <line x1="250" y1="140" x2="110" y2="220" stroke="#2E75B6" stroke-width="12" stroke-linecap="round"/>
+      <line x1="250" y1="140" x2="390" y2="220" stroke="#2E75B6" stroke-width="12" stroke-linecap="round"/>
+      <!-- Motors -->
+      <circle cx="110" cy="60" r="20" fill="#C00000"/>
+      <circle cx="390" cy="60" r="20" fill="#C00000"/>
+      <circle cx="110" cy="220" r="20" fill="#C00000"/>
+      <circle cx="390" cy="220" r="20" fill="#C00000"/>
+      <!-- Props (CCW: M1, M3; CW: M2, M4) -->
+      <ellipse cx="110" cy="60" rx="35" ry="8" fill="none" stroke="#1F4E79" stroke-width="2" stroke-dasharray="6,3"/>
+      <ellipse cx="390" cy="60" rx="35" ry="8" fill="none" stroke="#1F4E79" stroke-width="2" stroke-dasharray="4,4"/>
+      <ellipse cx="110" cy="220" rx="35" ry="8" fill="none" stroke="#1F4E79" stroke-width="2" stroke-dasharray="4,4"/>
+      <ellipse cx="390" cy="220" rx="35" ry="8" fill="none" stroke="#1F4E79" stroke-width="2" stroke-dasharray="6,3"/>
+      <!-- Motor labels -->
+      <text x="110" y="63" text-anchor="middle" font-size="9" fill="white">M1 CCW</text>
+      <text x="390" y="63" text-anchor="middle" font-size="9" fill="white">M2 CW</text>
+      <text x="110" y="223" text-anchor="middle" font-size="9" fill="white">M3 CW</text>
+      <text x="390" y="223" text-anchor="middle" font-size="9" fill="white">M4 CCW</text>
+      <!-- Landing gear -->
+      <line x1="220" y1="165" x2="215" y2="200" stroke="#888" stroke-width="3"/>
+      <line x1="280" y1="165" x2="285" y2="200" stroke="#888" stroke-width="3"/>
+      <line x1="215" y1="200" x2="285" y2="200" stroke="#888" stroke-width="3"/>
+      <!-- Annotation -->
+      <text x="250" y="260" text-anchor="middle" font-size="11" fill="#1F4E79">X-frame Quadrotor — 450mm diagonal</text>
+    </svg>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px">Top-view: X-frame configuration, diagonal motor-to-motor 450mm. CCW/CW prop pairs for yaw control.</p>
+  </div>
+  <div class="card">
+    <h2>🎯 Project Objective</h2>
+    <p style="color:var(--muted);line-height:1.8;font-size:14px">Design a quadrotor VTOL UAV capable of stable hover and autonomous flight. The project covers frame selection, propulsion system sizing (motor + propeller + battery), flight controller configuration, and performance estimation. Target payload: 200g camera/sensor package. Mission: aerial survey at low altitude (&lt;50m AGL).</p>
+    <div class="grid-3" style="margin-top:16px">
+      <div class="feature-row" style="border:none"><div class="icon">📡</div><div><h4>GPS Hover</h4><p>uBlox M8N, position hold within ±1m</p></div></div>
+      <div class="feature-row" style="border:none"><div class="icon">📷</div><div><h4>200g Payload</h4><p>Camera / sensor package</p></div></div>
+      <div class="feature-row" style="border:none"><div class="icon">🌬️</div><div><h4>Wind 10 m/s</h4><p>Stable flight in moderate wind</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIGURATION -->
+<div id="config" class="section">
+  <div class="grid-2">
+    <div class="card">
+      <h2>⚙️ Frame Configuration</h2>
+      <table>
+        <tr><th>Parameter</th><th>Value</th></tr>
+        <tr><td>Frame Type</td><td>X-frame quadrotor</td></tr>
+        <tr><td>Diagonal (M-to-M)</td><td>450 mm</td></tr>
+        <tr><td>Material</td><td>Carbon fibre + glass fibre</td></tr>
+        <tr><td>Arm thickness</td><td>16 mm carbon tube</td></tr>
+        <tr><td>Frame mass</td><td>~220g (with plates)</td></tr>
+        <tr><td>Max prop size</td><td>10 inch (250mm)</td></tr>
+        <tr><td>Motor mount pattern</td><td>16 mm pattern</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>⚡ Propulsion System</h2>
+      <table>
+        <tr><th>Component</th><th>Specification</th></tr>
+        <tr><td>Motor</td><td>2212 / 920KV BLDC × 4</td></tr>
+        <tr><td>Propeller</td><td>10×4.5 inch (4× props)</td></tr>
+        <tr><td>ESC</td><td>30A SimonK / BLHeli × 4</td></tr>
+        <tr><td>Battery</td><td>3S 5200mAh 35C LiPo</td></tr>
+        <tr><td>Max motor thrust</td><td>~800g per motor</td></tr>
+        <tr><td>Total thrust</td><td>~3200g (T/W ≈ 2.67)</td></tr>
+        <tr><td>Hover throttle</td><td>~45% (≈360g/motor)</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2>🧠 Electronics Stack</h2>
+    <table>
+      <tr><th>Subsystem</th><th>Component</th><th>Notes</th></tr>
+      <tr><td>Flight Controller</td><td>Pixhawk 2.4.8 / APM 2.8</td><td>ArduCopter firmware</td></tr>
+      <tr><td>GPS/Compass</td><td>uBlox NEO-M8N</td><td>External compass, 10Hz update</td></tr>
+      <tr><td>Telemetry</td><td>433 MHz SiK Radio</td><td>900m range, 57.6 kbps</td></tr>
+      <tr><td>R/C Receiver</td><td>FrSky X8R (8ch S.Bus)</td><td>2.4 GHz FHSS</td></tr>
+      <tr><td>Power Module</td><td>3DR standard PM</td><td>Voltage + current sensing</td></tr>
+      <tr><td>BEC</td><td>5V 3A UBEC</td><td>Servo/FC rail</td></tr>
+      <tr><td>Companion Computer</td><td>Raspberry Pi 4B (optional)</td><td>Mission planning / CV</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- PROP CALCULATOR -->
+<div id="calc" class="section">
+  <div class="card">
+    <h2>🧮 Propulsion Sizing Calculator</h2>
+    <div class="grid-2">
+      <div>
+        <div class="slider-row">
+          <label><span>Total Weight (AUW)</span><span id="v_w">1200 g</span></label>
+          <input type="range" min="500" max="3000" value="1200" step="50" oninput="updateCalc();document.getElementById('v_w').textContent=this.value+'g'">
+        </div>
+        <div class="slider-row">
+          <label><span>Number of Motors</span><span id="v_nm">4</span></label>
+          <input type="range" min="3" max="8" value="4" step="1" oninput="updateCalc();document.getElementById('v_nm').textContent=this.value">
+        </div>
+        <div class="slider-row">
+          <label><span>Hover Efficiency (g/W)</span><span id="v_eff">9.5 g/W</span></label>
+          <input type="range" min="6" max="15" value="9.5" step="0.5" oninput="updateCalc();document.getElementById('v_eff').textContent=this.value+' g/W'">
+        </div>
+        <div class="slider-row">
+          <label><span>Battery Capacity (mAh)</span><span id="v_bat">5200 mAh</span></label>
+          <input type="range" min="1000" max="10000" value="5200" step="100" oninput="updateCalc();document.getElementById('v_bat').textContent=this.value+' mAh'">
+        </div>
+        <div class="slider-row">
+          <label><span>Battery Voltage</span><span id="v_volt">11.1 V (3S)</span></label>
+          <input type="range" min="7.4" max="25.2" value="11.1" step="3.7" oninput="updateCalc();document.getElementById('v_volt').textContent=this.value.toFixed(1)+' V'">
+        </div>
+      </div>
+      <div>
+        <div class="result-grid" id="calc_results"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>📊 Thrust vs Throttle Chart</h2>
+    <div class="chart-box"><canvas id="thrustChart"></canvas></div>
+  </div>
+</div>
+
+<!-- PERFORMANCE -->
+<div id="perf" class="section">
+  <div class="card">
+    <h2>📊 Flight Time vs Payload</h2>
+    <div class="chart-box"><canvas id="ftChart"></canvas></div>
+  </div>
+  <div class="card">
+    <h2>📊 Thrust vs Battery Cell Count</h2>
+    <div class="chart-box"><canvas id="cellChart"></canvas></div>
+  </div>
+</div>
+
+<!-- STRUCTURE -->
+<div id="struct" class="section">
+  <div class="card">
+    <h2>🔩 Weight Budget</h2>
+    <table>
+      <tr><th>Component</th><th>Mass (g)</th><th>% of AUW</th></tr>
+      <tr><td>Frame + hardware</td><td>220</td><td>18.3%</td></tr>
+      <tr><td>4× Motors (2212)</td><td>196 (49g each)</td><td>16.3%</td></tr>
+      <tr><td>4× ESC (30A)</td><td>100 (25g each)</td><td>8.3%</td></tr>
+      <tr><td>4× Propellers</td><td>40 (10g each)</td><td>3.3%</td></tr>
+      <tr><td>Flight Controller + GPS</td><td>80</td><td>6.7%</td></tr>
+      <tr><td>Battery (3S 5200mAh)</td><td>320</td><td>26.7%</td></tr>
+      <tr><td>Payload (camera)</td><td>200</td><td>16.7%</td></tr>
+      <tr><td>Misc (wiring, connectors)</td><td>44</td><td>3.7%</td></tr>
+      <tr style="font-weight:bold;background:#f0f6ff"><td>TOTAL (AUW)</td><td>1200</td><td>100%</td></tr>
+    </table>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h2>🔩 Structural Considerations</h2>
+      <ul style="list-style:none;font-size:13px;color:var(--muted)">
+        <li style="padding:8px 0;border-bottom:1px solid #e8f0f8">✅ Carbon arms rated >50N tip load each</li>
+        <li style="padding:8px 0;border-bottom:1px solid #e8f0f8">✅ Vibration isolation: FC on 3M foam tape</li>
+        <li style="padding:8px 0;border-bottom:1px solid #e8f0f8">✅ Landing gear rated for 5× AUW impact</li>
+        <li style="padding:8px 0;border-bottom:1px solid #e8f0f8">✅ Battery strap rated 3× battery mass</li>
+        <li style="padding:8px 0">✅ Motor mounts with thread-lock on all bolts</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>⚡ Power Distribution</h2>
+      <ul style="list-style:none;font-size:13px;color:var(--muted)">
+        <li style="padding:8px 0;border-bottom:1px solid #e8f0f8">🔴 Battery → PDB (14AWG silicon wire)</li>
+        <li style="padding:8px 0;border-bottom:1px solid #e8f0f8">🔴 PDB → 4× ESC (16AWG)</li>
+        <li style="padding:8px 0;border-bottom:1px solid #e8f0f8">⚡ UBEC → Flight controller 5V rail</li>
+        <li style="padding:8px 0;border-bottom:1px solid #e8f0f8">📡 FC → Receiver via S.Bus</li>
+        <li style="padding:8px 0">📡 FC → Telemetry via UART</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="section">
+  <div class="grid-3" style="margin-bottom:20px">
+    <div class="stat-card"><div class="val">2.67</div><div class="unit">T/W ratio</div><div class="lbl">Thrust-to-Weight</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#C00000,#c0392b)"><div class="val">~18 min</div><div class="unit">Hover time</div><div class="lbl">3S 5200mAh</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#375623,#27ae60)"><div class="val">45%</div><div class="unit">Throttle</div><div class="lbl">Hover Point</div></div>
+  </div>
+  <div class="card">
+    <h2>📋 Full Design Results</h2>
+    <table>
+      <tr><th>Parameter</th><th>Designed</th><th>Target</th><th>Status</th></tr>
+      <tr><td>AUW</td><td>1200g</td><td>&lt;1500g</td><td><span class="badge badge-green">✅ Pass</span></td></tr>
+      <tr><td>T/W ratio</td><td>2.67</td><td>&gt;2.0</td><td><span class="badge badge-green">✅ Pass</span></td></tr>
+      <tr><td>Hover throttle</td><td>45%</td><td>&lt;55%</td><td><span class="badge badge-green">✅ Pass</span></td></tr>
+      <tr><td>Flight time (hover)</td><td>~18 min</td><td>&gt;15 min</td><td><span class="badge badge-green">✅ Pass</span></td></tr>
+      <tr><td>Payload</td><td>200g</td><td>200g</td><td><span class="badge badge-green">✅ Pass</span></td></tr>
+      <tr><td>Frame diagonal</td><td>450mm</td><td>400–500mm</td><td><span class="badge badge-green">✅ Pass</span></td></tr>
+      <tr><td>Wind resistance</td><td>~10 m/s</td><td>&gt;8 m/s</td><td><span class="badge badge-green">✅ Pass</span></td></tr>
+      <tr><td>Max altitude AGL</td><td>50m (design)</td><td>50m</td><td><span class="badge badge-green">✅ Pass</span></td></tr>
+    </table>
+  </div>
+</div>
+</div>
+<footer>Def Space Summer Internship 2026 &nbsp;|&nbsp; Nitish Kumar Kannaujiya — 24BECCS33 &nbsp;|&nbsp; B.Tech CSE Cybersecurity &nbsp;|&nbsp; Central University of Jammu</footer>
+<script>
+function showTab(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+let thrustChart=null, ftChart=null, cellChart=null;
+function updateCalc(){
+  const auw=parseFloat(document.querySelector('#calc .slider-row:nth-child(1) input').value);
+  const nm=parseFloat(document.querySelector('#calc .slider-row:nth-child(2) input').value);
+  const eff=parseFloat(document.querySelector('#calc .slider-row:nth-child(3) input').value);
+  const bat=parseFloat(document.querySelector('#calc .slider-row:nth-child(4) input').value);
+  const volt=parseFloat(document.querySelector('#calc .slider-row:nth-child(5) input').value);
+  const thrPerMotor=(auw/nm)*2.5; // aim T/W=2.5
+  const hoverPer=auw/(nm*eff);
+  const totalHoverPow=hoverPer*nm;
+  const capWh=bat*volt/1000;
+  const flightMin=(capWh/totalHoverPow)*60*0.8; // 80% usable
+  const tw=thrPerMotor*nm/auw;
+  const hoThr=Math.round((auw/nm)/thrPerMotor*100);
+  document.getElementById('calc_results').innerHTML=`
+    <div class="result-chip"><div class="rv">${thrPerMotor.toFixed(0)}g</div><div class="rl">Thrust/Motor</div></div>
+    <div class="result-chip"><div class="rv">${tw.toFixed(2)}</div><div class="rl">T/W Ratio</div></div>
+    <div class="result-chip"><div class="rv">${hoverPer.toFixed(0)}W</div><div class="rl">Power/Motor</div></div>
+    <div class="result-chip"><div class="rv">${totalHoverPow.toFixed(0)}W</div><div class="rl">Total Power</div></div>
+    <div class="result-chip"><div class="rv">${capWh.toFixed(1)} Wh</div><div class="rl">Battery Cap</div></div>
+    <div class="result-chip"><div class="rv">${flightMin.toFixed(1)} min</div><div class="rl">Flight Time</div></div>
+    <div class="result-chip"><div class="rv">${hoThr}%</div><div class="rl">Hover Throttle</div></div>
+    <div class="result-chip"><div class="rv">${(bat/totalHoverPow*1000/1000).toFixed(1)} A</div><div class="rl">Current (hover)</div></div>
+  `;
+  const throttles=[0,10,20,30,40,50,60,70,80,90,100];
+  const thrusts=throttles.map(t=>{const pw=(t/100);return (thrPerMotor*(Math.pow(pw,1.8))).toFixed(1);});
+  if(thrustChart) thrustChart.destroy();
+  thrustChart=new Chart(document.getElementById('thrustChart'),{type:'line',data:{labels:throttles.map(t=>t+'%'),datasets:[{label:'Total Thrust (g)',data:thrusts.map(t=>t*nm),borderColor:'#C00000',fill:true,backgroundColor:'rgba(192,0,0,0.1)',tension:.4},{label:'Required for Hover (g)',data:throttles.map(()=>auw),borderColor:'#2E75B6',borderDash:[5,5],fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,title:{display:true,text:'Thrust (g)'}}}}});
+}
+function buildPerfCharts(){
+  const payloads=[0,100,200,300,400,500];
+  const baseFT=18;
+  const fts=payloads.map(p=>Math.max(5,baseFT-p/50));
+  ftChart=new Chart(document.getElementById('ftChart'),{type:'line',data:{labels:payloads.map(p=>p+'g'),datasets:[{label:'Flight Time (min)',data:fts,borderColor:'#1F4E79',backgroundColor:'rgba(31,78,121,0.1)',fill:true,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{title:{display:true,text:'Payload (g)'}},y:{title:{display:true,text:'Flight Time (min)'},min:0}}}});
+  const cells=[3,4,5,6];
+  const thrusts=cells.map(c=>3200*(c/3));
+  cellChart=new Chart(document.getElementById('cellChart'),{type:'bar',data:{labels:cells.map(c=>c+'S LiPo'),datasets:[{label:'Total Thrust (g)',data:thrusts,backgroundColor:['#1F4E79','#2E75B6','#5499C7','#BDD7EE']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,title:{display:true,text:'Total Thrust (g)'}}}}});
+}
+window.addEventListener('load',()=>{updateCalc();buildPerfCharts();});
+</script>
+</body>
+</html>
